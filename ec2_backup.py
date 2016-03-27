@@ -3,9 +3,21 @@ import subprocess
 import boto3
 import pycurl
 from datetime import datetime, date, time
+from StringIO import StringIO
 
 #Variables section
-instanceID = 'i-ea11c543'
+instanceID = StringIO()
+c = pycurl.Curl()
+c.setopt(c.URL, 'http://169.254.169.254/latest/meta-data/instance-id/')
+c.setopt(c.IPRESOLVE, c.IPRESOLVE_V4)
+c.setopt(c.WRITEDATA, instanceID)
+c.perform()
+c.close()
+
+instanceID = instanceID.getvalue()
+
+print instanceID
+
 amiDescription = 'Daily Snapshot for instance ' + 'instanceID'
 aws_region = 'us-east-1'
 
