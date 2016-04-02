@@ -3,23 +3,33 @@ import subprocess
 import boto3
 import pycurl
 from datetime import datetime, date, time
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 #Variables section
 instanceID = StringIO()
 c = pycurl.Curl()
 c.setopt(c.URL, 'http://169.254.169.254/latest/meta-data/instance-id/')
 c.setopt(c.IPRESOLVE, c.IPRESOLVE_V4)
-c.setopt(c.WRITEDATA, instanceID)
+c.setopt(c.WRITEFUNCTION, instanceID.write)
 c.perform()
 c.close()
-
 instanceID = instanceID.getvalue()
 
-print instanceID
+region = StringIO()
+r = pycurl.Curl()
+r.setopt(r.URL, 'http://169.254.169.254/latest/meta-data/placement/availability-zone/')
+r.setopt(r.WRITEFUNCTION, region.write)
+r.perform()
+r.close()
+region = region.getvalue()
+aws_region = region[:-1]
+
+print (instanceID)
 
 amiDescription = 'Daily Snapshot for instance ' + 'instanceID'
-aws_region = 'us-east-1'
 
 client = boto3.client('ec2', region_name=aws_region)
 
@@ -41,7 +51,7 @@ for i,mount in enumerate(listdrives.split()):
 #timestamp=subprocess.check_output(['/bin/date', '+"%F"'])
 timestamp=datetime.utcnow().strftime("%d %b %Y %I.%M%p")
 imageName=instanceID+'-'+timestamp
-print imageName
+print (imageName)
 
 #section to create the AMI
 response = client.create_image(
@@ -52,7 +62,7 @@ response = client.create_image(
     NoReboot=True
 )
 
-print response
+print (response)
 
 #unfreeze the filesystems
 for i,mount in enumerate(listdrives.split()):
