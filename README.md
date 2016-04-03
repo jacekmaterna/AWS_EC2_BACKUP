@@ -73,4 +73,6 @@ python27 ~/github/AWS_EC2_BACKUP/ec2_backup.py
 ```
 
 Make sure you have a credentials file (if you are not using an IAM role) in the following location:
-```~/.aws/credentials```
+```
+~/.aws/credentials
+```
